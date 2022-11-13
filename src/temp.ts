@@ -1,16 +1,42 @@
-function combineObjects<input1 extends object, input2 extends object>(input1: input1, input2: input2): input1 & input2 {
-	return { ...input1, ...input2 };
-}
-
-// middlewares is an array of combineObject calls
-const middlewares = [{ one: 'true' }, { two: 'true' }, { three: 'true' }];
-
-const outputObject = combineObjects({ name: 'nou' }, { id: '123' });
-
-let currentObject = { hi: true };
-for (const middlewareObject of middlewares) {
-	currentObject = combineObjects(middlewareObject, currentObject);
-}
-console.log(currentObject);
-
 export {};
+import { z } from 'zod';
+
+const route = buildRoute({
+	// method: automatically determined
+	// path: automatically determined
+	inputZod: z.object({
+		name: z.string(),
+	}), 
+	outputZod: z.object({
+		hash: z.string(),
+	}),
+	responseZod: z.object({
+		responseThing: z.string(),
+	}),
+	func: (input) => {
+		console.log(input);
+		return { hash: '69' };
+	},
+});
+
+function buildRoute<InputZod extends z.ZodTypeAny, OutputZod extends z.ZodTypeAny>(input: { inputZod: InputZod; outputZod: OutputZod; func: (input: z.infer<InputZod>) => z.infer<OutputZod> }) {
+	return input;
+}
+
+function other(increaseValue: () => void) {
+	increaseValue();
+}
+
+function main() {
+	let value = 0;
+	function increaseValue() {
+		value++;
+		console.log(value);
+	}
+
+	other(increaseValue);
+}
+main(); // 1
+main(); // 1
+
+process.exit(0);

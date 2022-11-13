@@ -52,7 +52,7 @@ import { GetUserFunction, middlewareGetUser } from '~/middlewares/getUser';
 // // data.error.issues
 // // }
 
-const Input = z.object({
+const InputZod = z.object({
 	name: z.string(),
 });
 
@@ -61,15 +61,39 @@ const Output = z.object({
 });
 
 const responses = z.array(z.union([z.object({ statusCode: z.literal(200) }), z.object({ statusCode: z.literal(400) })]));
-const myFunction = async (input: z.infer<typeof Input>): Promise<z.infer<typeof Output>> => {
+const myFunction = async (sendResponse: (something: z.infer<typeof responses>) => {}, Input: z.infer<typeof InputZod>): Promise<z.infer<typeof Output>> => {
+	sendResponse({ statusCode: 200 });
 	return { password: '123' };
 };
 
-const thisRouteMiddleware: Middleware<typeof Input, typeof Output> = {
-	inputZod: Input,
-	outputZod: Output,
-	responses: [responses],
-	func: myFunction,
+// const thisRouteMiddleware: Middleware<typeof InputZod, typeof Output> = {
+// 	inputZod: InputZod,
+
+// 	outputZod: Output,
+// 	responses: [responses],
+
+// 	func: myFunction,
+// };
+const thisRouteMiddleware: Middleware = {
+	inputZod: z.object({
+		name: z.string(),
+	}),
+
+	outputZod: z.object({
+		hash: z.string(),
+	}),
+	responses: [
+		z.object({
+			statusCode: z.literal(200),
+		}),
+		z.object({
+			statusCode: z.literal(400),
+		}),
+	],
+
+	func: async (sendResponse, input) => {
+		console.log(input);
+	},
 };
 const endpoint: Endpoint = {
 	middlewares: [middlewareGetUser, thisRouteMiddleware],
